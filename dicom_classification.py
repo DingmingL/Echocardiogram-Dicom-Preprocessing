@@ -62,33 +62,7 @@ def classify_ultrasound_image(image,
                               threshold_mid_blue=200, 
                               dominance_margin=30, 
                               gray_tol=10):
-    """
-    Classify an RGB ultrasound image based on regional color distributions.
 
-    Rules:
-      1. Top-right region grayscale check:
-         - If R ≈ G ≈ B (differences < gray_tol) in the top-right area, classify as "grey".
-      2. Middle region Doppler check:
-         a) Color Doppler:
-            - Find the top 10 pixels by red channel in the middle region.
-            - If mean(R) >= threshold_mid_red AND mean(G) < threshold_others AND mean(B) < threshold_others
-              AND G ≈ B (difference < gray_tol), classify as "color_doppler".
-         b) Continuous Doppler:
-            - Find the top 10 pixels by blue channel in the middle region.
-            - If mean(B) >= threshold_mid_blue AND mean(R) < threshold_others AND mean(G) < threshold_others
-              AND R ≈ G (difference < gray_tol), classify as "continuous_doppler".
-      3. If none of the above conditions are met, return "cannot_classify".
-
-    Parameters:
-      image (np.ndarray): RGB image of shape (H, W, 3)
-      threshold_mid_red (float): Red channel threshold for Color Doppler in the middle region.
-      threshold_mid_blue (float): Blue channel threshold for Continuous Doppler in the middle region.
-      threshold_others (float): Maximum allowed mean for the non-dominant channels.
-      gray_tol (float): Tolerance for channel difference used in grayscale check.
-
-    Returns:
-      str: "grey", "color_doppler", "continuous_doppler", or "cannot_classify".
-    """
     if len(image.shape) != 3 or image.shape[2] != 3:
         raise ValueError("Input image must be a 3D RGB numpy array.")
     
@@ -126,17 +100,7 @@ def classify_ultrasound_image(image,
 
 
 def dicom_classify(folder_path, file, test=False):
-    """
-    Classify DICOM files in folder_path into two subfolders based on the 
-    (0028,0014) 'Ultrasound Color Data Present' tag.
-    
-    Subfolders created:
-      - color_video: Files with Ultrasound Color Data Present (truthy value)
-      - grey_video:  Files without or with a false value for the tag
-    
-    Parameters:
-      folder_path (str): Path to the folder containing DICOM files.
-    """
+
     # Define the target subfolder paths
     color_video_folder = os.path.join(folder_path, 'color_video')
     grey_video_folder = os.path.join(folder_path, 'grey_video')
@@ -209,7 +173,7 @@ def main():
     logging.info("Starting DICOM classification task...")
 
     parser = argparse.ArgumentParser(
-        description="Generate masked AVI videos from DICOM files."
+        description="Classification on DICOM files."
     )
     parser.add_argument(
         "--input_dir",
@@ -220,7 +184,6 @@ def main():
     args = parser.parse_args()
 
     root_dir = args.input_dir
-
     dcm_paths = pd.read_csv(f"{root_dir}echo-record-list.csv")['dicom_filepath']
 
     failed_paths = []
