@@ -2,14 +2,12 @@ import os
 import numpy as np
 import pandas as pd
 import pydicom
-from PIL import Image
+import argparse
 import shutil
 import matplotlib.pyplot as plt
 import logging
 import sys
 from datetime import datetime
-
-
 
 
 def top10_pixel_means(region, channel_index, n=10):
@@ -210,7 +208,19 @@ def main():
 
     logging.info("Starting DICOM classification task...")
 
-    root_dir = "/sc-scratch/sc-scratch-dh-echovit/physionet.org/files/mimic-iv-echo/0.1/"
+    parser = argparse.ArgumentParser(
+        description="Generate masked AVI videos from DICOM files."
+    )
+    parser.add_argument(
+        "--input_dir",
+        type=str,
+        required=True,
+        help="Input directory containing DICOM files."
+    )
+    args = parser.parse_args()
+
+    root_dir = args.input_dir
+
     dcm_paths = pd.read_csv(f"{root_dir}echo-record-list.csv")['dicom_filepath']
 
     failed_paths = []
